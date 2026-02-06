@@ -1,0 +1,2192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lummina | Life OS</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        lummina: {
+                            bg: '#0f172a', 
+                            panel: 'rgba(30, 41, 59, 0.6)', 
+                            primary: '#8b5cf6', 
+                            success: '#10b981', 
+                            danger: '#f43f5e', 
+                            warning: '#f59e0b',
+                            text: '#f8fafc',
+                            muted: '#94a3b8'
+                        }
+                    },
+                    animation: {
+                        'spin-slow': 'spin 3s linear infinite',
+                        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'slide-up': 'slideUp 0.3s ease-out forwards',
+                        'orbit': 'orbit 2s linear infinite',
+                        'bounce-subtle': 'bounceSubtle 2s infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                    },
+                    keyframes: {
+                        slideUp: {
+                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        orbit: {
+                            '0%': { transform: 'rotate(0deg)' },
+                            '100%': { transform: 'rotate(360deg)' },
+                        },
+                        bounceSubtle: {
+                            '0%, 100%': { transform: 'translateY(-3%)' },
+                            '50%': { transform: 'translateY(0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; overflow: hidden; height: 100dvh; }
+        
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .glass-input {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white !important;
+            transition: all 0.2s ease;
+        }
+        .glass-input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            background: rgba(15, 23, 42, 0.8);
+        }
+        
+        input, textarea, select { color: white !important; }
+        option { background-color: #0f172a; color: white; }
+
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(1) opacity(0.5);
+            cursor: pointer;
+        }
+
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.5); }
+
+        .loader-ring {
+            position: absolute; border-radius: 50%;
+            border: 2px solid transparent; border-top-color: #8b5cf6; border-bottom-color: #f43f5e;
+        }
+        
+        .mobile-scroll-x {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .today-glow {
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
+            border-color: #8b5cf6;
+        }
+
+        .mood-btn.active-mood {
+            transform: scale(1.25);
+            opacity: 1;
+            filter: drop-shadow(0 0 8px rgba(255,255,255,0.5));
+        }
+
+        /* Chat Specific Styles */
+        .chat-msg {
+            max-width: 80%;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 12px;
+            animation: slideUp 0.3s ease-out;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+        .chat-user {
+            background: rgba(139, 92, 246, 0.2);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            margin-left: auto;
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+        .chat-ai {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-right: auto;
+            color: #cbd5e1;
+            border-bottom-left-radius: 2px;
+        }
+        .typing-dot {
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background-color: #cbd5e1;
+            animation: typing 1.4s infinite ease-in-out both;
+            margin: 0 1px;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="flex flex-col font-sans">
+
+    <!-- OVERLAYS: Loaders & Notifications -->
+    <div id="globalLoader" class="fixed inset-0 z-[100] hidden bg-black/50 backdrop-blur-sm flex items-center justify-center">
+        <div class="glass-panel px-6 py-4 rounded-xl flex items-center justify-center gap-3 animate-slide-up">
+            <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-lummina-primary"></i>
+            <span id="loaderMsg" class="text-sm font-medium">Processing...</span>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notifToast" class="fixed top-4 right-4 z-[90] hidden max-w-sm w-full animate-slide-up">
+        <div class="glass-panel p-4 rounded-xl border-l-4 border-lummina-primary flex gap-3 shadow-2xl bg-[#0f172a]">
+            <div class="p-2 bg-white/10 rounded-full h-fit"><i id="notifIcon" data-lucide="bell" class="w-5 h-5 text-white"></i></div>
+            <div class="flex-1">
+                <h4 id="notifTitle" class="font-bold text-sm text-white">Notification</h4>
+                <p id="notifBody" class="text-xs text-lummina-muted mt-1 leading-relaxed">Message body here.</p>
+            </div>
+            <button onclick="document.getElementById('notifToast').classList.add('hidden')" class="text-white/30 hover:text-white h-fit"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+    </div>
+
+    <!-- 1. PRELOADER -->
+    <div id="preloader" class="fixed inset-0 bg-[#0f172a] z-[9999] flex flex-col items-center justify-center transition-opacity duration-700">
+        <div class="relative w-20 h-20 flex items-center justify-center">
+            <div class="loader-ring w-full h-full animate-orbit"></div>
+            <div class="loader-ring w-12 h-12 animate-orbit" style="animation-direction: reverse; animation-duration: 1.5s;"></div>
+            <div class="text-xl font-bold tracking-tighter z-10">L</div>
+        </div>
+        <div class="mt-4 text-[10px] text-lummina-muted uppercase tracking-[0.2em] animate-pulse">System Boot</div>
+    </div>
+
+    <!-- 2. AUTH SCREEN -->
+    <div id="authScreen" class="fixed inset-0 z-50 bg-[#0f172a] hidden flex-col items-center justify-center p-4">
+        <div class="glass-panel p-8 rounded-2xl w-full max-w-md animate-slide-up">
+            <div class="text-center mb-8">
+                <div class="w-12 h-12 bg-gradient-to-tr from-lummina-primary to-blue-600 rounded-xl mx-auto mb-4 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                    <i data-lucide="fingerprint" class="text-white w-6 h-6"></i>
+                </div>
+                <h1 class="text-2xl font-bold">Lummina OS</h1>
+                <p class="text-lummina-muted text-sm">Select User Vault</p>
+            </div>
+            <div id="profileList" class="space-y-2 mb-6 max-h-60 overflow-y-auto custom-scrollbar pr-1"></div>
+            <button onclick="auth.showCreateProfile()" class="w-full py-3 border border-dashed border-white/10 rounded-xl text-sm text-lummina-muted hover:border-lummina-primary hover:text-white transition-all flex items-center justify-center gap-2 group">
+                <i data-lucide="plus" class="w-4 h-4 group-hover:scale-110 transition-transform"></i> New Vault
+            </button>
+        </div>
+    </div>
+
+    <!-- 3. MAIN APP -->
+    <div id="appContainer" class="flex-1 flex overflow-hidden opacity-0 transition-opacity duration-500 h-[100dvh]">
+        
+        <!-- SIDEBAR -->
+        <aside class="w-16 lg:w-64 glass-panel border-r border-r-white/5 flex flex-col z-40 transition-all shrink-0">
+            <div class="h-16 flex items-center justify-center lg:justify-start lg:px-6 border-b border-white/5 shrink-0">
+                <div class="w-8 h-8 bg-gradient-to-br from-lummina-primary to-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0">
+                    <span class="font-bold text-white">L</span>
+                </div>
+                <span class="hidden lg:block ml-3 font-bold text-lg tracking-tight">Lummina</span>
+            </div>
+
+            <nav class="flex-1 p-2 lg:p-4 space-y-1 overflow-y-auto min-h-0">
+                <button onclick="app.navigate('dashboard')" class="nav-btn group w-full p-2.5 rounded-lg flex items-center justify-center lg:justify-start gap-3 text-lummina-muted hover:bg-white/5 transition-all active-nav" title="Dashboard">
+                    <i data-lucide="layout-grid" class="w-5 h-5 group-hover:text-lummina-primary"></i> <span class="hidden lg:block text-sm font-medium">Dashboard</span>
+                </button>
+                <button onclick="app.navigate('assistant')" class="nav-btn group w-full p-2.5 rounded-lg flex items-center justify-center lg:justify-start gap-3 text-lummina-muted hover:bg-white/5 transition-all" title="Assistant">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-lummina-primary group-hover:text-white animate-pulse-fast"></i> <span class="hidden lg:block text-sm font-medium">Assistant</span>
+                </button>
+                <button onclick="app.navigate('calendar')" class="nav-btn group w-full p-2.5 rounded-lg flex items-center justify-center lg:justify-start gap-3 text-lummina-muted hover:bg-white/5 transition-all" title="Calendar">
+                    <i data-lucide="calendar-range" class="w-5 h-5 group-hover:text-lummina-warning"></i> <span class="hidden lg:block text-sm font-medium">Calendar</span>
+                </button>
+                <button onclick="app.navigate('projects')" class="nav-btn group w-full p-2.5 rounded-lg flex items-center justify-center lg:justify-start gap-3 text-lummina-muted hover:bg-white/5 transition-all" title="Projects">
+                    <i data-lucide="folder-kanban" class="w-5 h-5 group-hover:text-lummina-success"></i> <span class="hidden lg:block text-sm font-medium">Projects</span>
+                </button>
+                <button onclick="app.navigate('events')" class="nav-btn group w-full p-2.5 rounded-lg flex items-center justify-center lg:justify-start gap-3 text-lummina-muted hover:bg-white/5 transition-all" title="Events">
+                    <i data-lucide="ticket" class="w-5 h-5 group-hover:text-pink-400"></i> <span class="hidden lg:block text-sm font-medium">Events</span>
+                </button>
+                <button onclick="app.navigate('routines')" class="nav-btn group w-full p-2.5 rounded-lg flex items-center justify-center lg:justify-start gap-3 text-lummina-muted hover:bg-white/5 transition-all" title="Routines">
+                    <i data-lucide="repeat" class="w-5 h-5 group-hover:text-lummina-danger"></i> <span class="hidden lg:block text-sm font-medium">Routines</span>
+                </button>
+                <button onclick="app.navigate('journal')" class="nav-btn group w-full p-2.5 rounded-lg flex items-center justify-center lg:justify-start gap-3 text-lummina-muted hover:bg-white/5 transition-all" title="Logs & Memos">
+                    <i data-lucide="scroll-text" class="w-5 h-5 group-hover:text-blue-400"></i> <span class="hidden lg:block text-sm font-medium">Logs & Memos</span>
+                </button>
+            </nav>
+
+            <div class="p-2 lg:p-4 border-t border-white/5 space-y-1 shrink-0 bg-[#0f172a]/20 backdrop-blur-sm">
+                <button onclick="app.navigate('settings')" class="nav-btn group w-full p-2.5 rounded-lg flex items-center justify-center lg:justify-start gap-3 text-lummina-muted hover:bg-white/5 transition-all" title="Settings">
+                    <i data-lucide="settings" class="w-5 h-5 group-hover:text-blue-400"></i> <span class="hidden lg:block text-sm font-medium">Settings</span>
+                </button>
+                <button onclick="auth.logout()" class="w-full p-2.5 rounded-lg flex items-center justify-center lg:justify-start gap-3 text-lummina-muted hover:bg-red-500/10 hover:text-red-400 transition-all" title="Lock">
+                    <i data-lucide="lock" class="w-5 h-5"></i> <span class="hidden lg:block text-sm font-medium">Lock</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN VIEWPORT -->
+        <main class="flex-1 flex flex-col relative bg-gradient-to-br from-[#0f172a] to-[#020617] w-full min-w-0">
+            <!-- HEADER -->
+            <header class="h-16 border-b border-white/5 flex items-center justify-between px-4 lg:px-8 z-30 bg-[#0f172a]/80 backdrop-blur-md shrink-0">
+                <div class="flex flex-col justify-center">
+                    <h2 id="pageTitle" class="text-lg font-semibold tracking-tight leading-tight">Dashboard</h2>
+                    <div id="headerDate" class="text-[10px] text-lummina-muted uppercase tracking-wider hidden sm:block"></div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div id="clockDisplay" class="hidden md:block font-mono text-xs text-lummina-primary bg-lummina-primary/10 px-2 py-1 rounded border border-lummina-primary/20">00:00:00</div>
+                    
+                    <!-- NEW MAGIC ADD BUTTON -->
+                    <button onclick="ui.toggleModal('magicModal')" class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-2 shadow-lg shadow-purple-500/20 transition-all hover:scale-105">
+                        <i data-lucide="wand-2" class="w-4 h-4"></i> <span class="hidden sm:inline">Magic Add</span>
+                    </button>
+
+                    <!-- Notification Bell -->
+                    <button onclick="ui.toggleNotifCenter()" class="relative p-2 rounded-lg hover:bg-white/10 transition-colors">
+                        <i data-lucide="bell" class="w-5 h-5 text-white/70"></i>
+                        <span id="notifDot" class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full hidden animate-pulse"></span>
+                    </button>
+
+                    <button onclick="ui.toggleModal('createModal')" class="bg-white text-black hover:bg-gray-200 active:scale-95 transition-all px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-2 shadow-lg shadow-white/5">
+                        <i data-lucide="plus" class="w-4 h-4"></i> <span class="hidden sm:inline">Add Item</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Notification Center Panel -->
+            <div id="notifCenter" class="absolute top-16 right-4 lg:right-8 w-80 glass-panel rounded-b-xl z-50 hidden max-h-[50vh] overflow-y-auto custom-scrollbar border-t-0 shadow-2xl">
+                <div class="p-3 border-b border-white/10 flex justify-between items-center bg-[#0f172a]/90 backdrop-blur sticky top-0">
+                    <span class="text-xs font-bold uppercase text-lummina-muted">Notifications</span>
+                    <button onclick="logic.clearNotifs()" class="text-xs text-lummina-primary hover:underline">Clear All</button>
+                </div>
+                <div id="notifList" class="p-2 space-y-1">
+                    <!-- Dynamic -->
+                </div>
+            </div>
+
+            <!-- SCROLLABLE CONTENT -->
+            <div id="viewport" class="flex-1 overflow-y-auto p-4 lg:p-6 pb-24 scroll-smooth">
+                <!-- Dynamic Content -->
+            </div>
+        </main>
+    </div>
+
+    <!-- MODALS -->
+
+    <!-- NEW MAGIC ADD MODAL -->
+    <div id="magicModal" class="fixed inset-0 z-[65] hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-xl rounded-2xl overflow-hidden animate-slide-up shadow-2xl relative">
+            <button onclick="ui.toggleModal('magicModal')" class="absolute top-4 right-4 text-white/30 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <div class="p-8 text-center">
+                <div class="w-16 h-16 bg-gradient-to-tr from-lummina-primary to-purple-600 rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-lg shadow-purple-500/20 animate-bounce-subtle">
+                    <i data-lucide="wand-2" class="text-white w-8 h-8"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-2">Magic Add</h3>
+                <p class="text-lummina-muted text-sm mb-6">Describe what you want to add. Gemini will figure out the rest.</p>
+                
+                <form onsubmit="app.handleMagicAdd(event)" class="relative">
+                    <input id="magicInput" type="text" placeholder="e.g. 'Gym every morning', 'Meeting with John tomorrow at 2pm'..." class="w-full glass-input rounded-xl p-4 pr-24 text-base shadow-inner">
+                    <div class="absolute right-2 top-2 flex gap-1">
+                        <button type="button" onclick="app.startVoice()" class="p-2 bg-white/10 hover:bg-pink-500 hover:text-white rounded-lg text-white/70 transition-colors" title="Use Voice">
+                            <i data-lucide="mic" class="w-5 h-5"></i>
+                        </button>
+                        <button type="submit" class="p-2 bg-white/10 hover:bg-lummina-primary rounded-lg text-white transition-colors">
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="mt-6 flex flex-wrap gap-2 justify-center text-[10px] text-white/30">
+                    <span class="bg-white/5 px-2 py-1 rounded">"New project: Website Redesign due next Friday"</span>
+                    <span class="bg-white/5 px-2 py-1 rounded">"Dinner at 7pm tonight"</span>
+                    <span class="bg-white/5 px-2 py-1 rounded">"Weekly review every Sunday"</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Generic Modal Wrapper -->
+    <div id="createModal" class="fixed inset-0 z-[60] hidden bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-lg rounded-2xl overflow-hidden animate-slide-up shadow-2xl">
+            <div class="p-4 border-b border-white/10 flex justify-between items-center bg-white/5">
+                <h3 class="font-semibold">Quick Add</h3>
+                <button onclick="ui.toggleModal('createModal')" class="text-white/50 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6">
+                <div class="flex gap-2 mb-6 p-1 bg-black/20 rounded-lg overflow-x-auto">
+                    <button onclick="ui.switchFormTab('task')" class="form-tab-btn flex-1 py-1.5 px-3 text-xs font-bold rounded bg-white/10 text-white transition-all whitespace-nowrap" data-tab="task">Task</button>
+                    <button onclick="ui.switchFormTab('event')" class="form-tab-btn flex-1 py-1.5 px-3 text-xs font-bold rounded text-white/50 hover:text-white transition-all whitespace-nowrap" data-tab="event">Event</button>
+                    <button onclick="ui.switchFormTab('routine')" class="form-tab-btn flex-1 py-1.5 px-3 text-xs font-bold rounded text-white/50 hover:text-white transition-all whitespace-nowrap" data-tab="routine">Routine</button>
+                    <button onclick="ui.switchFormTab('project')" class="form-tab-btn flex-1 py-1.5 px-3 text-xs font-bold rounded text-white/50 hover:text-white transition-all whitespace-nowrap" data-tab="project">Project</button>
+                </div>
+
+                <form id="creationForm" onsubmit="app.handleCreate(event)">
+                    <input type="hidden" id="createType" value="task">
+                    <div class="space-y-4">
+                        <input type="text" id="inpTitle" required class="w-full glass-input rounded-lg p-3 text-sm font-medium placeholder-white/20" placeholder="Title...">
+                        
+                        <div id="field-memo" class="hidden relative">
+                             <textarea id="inpMemo" rows="2" class="w-full glass-input rounded-lg p-3 text-sm pr-10" placeholder="Optional memo..."></textarea>
+                             <button type="button" onclick="app.aiEnhanceMemo()" class="absolute right-2 bottom-2 text-lummina-primary hover:scale-110 transition-transform" title="AI Auto-Memo">✨</button>
+                        </div>
+
+                        <!-- Event Specifics -->
+                        <div id="field-event" class="hidden space-y-4">
+                            <input type="text" id="inpLocation" class="w-full glass-input rounded-lg p-3 text-sm" placeholder="Location (e.g., Office, Zoom)">
+                            <select id="inpEventType" class="w-full glass-input rounded-lg p-3 text-sm">
+                                <option value="meeting">Meeting</option>
+                                <option value="personal">Personal</option>
+                                <option value="travel">Travel</option>
+                                <option value="deadline">Deadline</option>
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4" id="row-datetime">
+                            <input type="date" id="inpDate" class="glass-input rounded-lg p-3 text-sm text-white/80">
+                            <input type="time" id="inpTime" class="glass-input rounded-lg p-3 text-sm text-white/80">
+                        </div>
+
+                        <div id="field-routine" class="hidden space-y-2">
+                             <select id="inpFreq" class="w-full glass-input rounded-lg p-3 text-sm">
+                                <option value="daily">Daily Loop</option>
+                                <option value="weekly">Weekly Reset</option>
+                                <option value="monthly">Monthly Goal</option>
+                            </select>
+                        </div>
+
+                        <div id="field-project" class="hidden">
+                            <textarea id="inpGoal" rows="2" class="w-full glass-input rounded-lg p-3 text-sm" placeholder="Success outcome (WBS goal)..."></textarea>
+                            <select id="inpProjStatus" class="w-full glass-input rounded-lg p-3 text-sm mt-2">
+                                <option value="planned">Planned</option>
+                                <option value="active" selected>Active / In Progress</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4" id="row-priority">
+                            <select id="inpPriority" class="w-full glass-input rounded-lg p-3 text-sm">
+                                <option value="low">Low Priority</option>
+                                <option value="medium" selected>Medium Priority</option>
+                                <option value="high">High Priority</option>
+                            </select>
+                            <div id="field-parentProject">
+                                <select id="inpProjectLink" class="w-full glass-input rounded-lg p-3 text-sm text-white/70">
+                                    <option value="">No Project</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full mt-6 bg-lummina-primary hover:bg-violet-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-lummina-primary/20">Create Item</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Detail Modal -->
+    <div id="projectDetailModal" class="fixed inset-0 z-[65] hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-2 lg:p-8">
+        <div class="glass-panel w-full max-w-4xl h-full lg:h-[85vh] flex flex-col rounded-2xl overflow-hidden animate-slide-up">
+            <div id="projectDetailContent" class="flex-1 flex flex-col h-full relative"></div>
+        </div>
+    </div>
+
+    <!-- Auth Modals -->
+    <div id="profileModal" class="fixed inset-0 z-[70] hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-sm rounded-2xl p-6 animate-slide-up">
+            <h3 class="text-lg font-bold mb-4">Create New Vault</h3>
+            <form onsubmit="auth.createProfile(event)">
+                <input type="text" id="newProfileName" required placeholder="Vault Name" class="w-full glass-input rounded-lg p-3 mb-3 text-sm">
+                <input type="password" id="newProfilePin" pattern="[0-9]*" inputmode="numeric" placeholder="4-Digit PIN (Optional)" class="w-full glass-input rounded-lg p-3 mb-6 text-sm">
+                <div class="flex gap-2">
+                    <button type="button" onclick="document.getElementById('profileModal').classList.add('hidden')" class="flex-1 py-2 text-sm text-white/50 hover:text-white">Cancel</button>
+                    <button type="submit" class="flex-1 bg-white text-black rounded-lg py-2 text-sm font-bold">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="pinModal" class="fixed inset-0 z-[70] hidden bg-black/90 backdrop-blur-xl flex items-center justify-center p-4">
+        <div class="text-center w-full max-w-xs animate-slide-up">
+            <div class="mb-4"><i data-lucide="lock" class="w-10 h-10 text-lummina-primary mx-auto"></i></div>
+            <h3 id="pinProfileName" class="text-lg font-bold mb-1">Enter PIN</h3>
+            <p id="pinActionType" class="text-xs text-white/40 mb-6 uppercase tracking-wider">Unlock Vault</p>
+            <input type="password" id="pinInput" maxlength="6" class="w-full text-center text-3xl tracking-[0.5em] bg-transparent border-b border-white/20 focus:border-lummina-primary outline-none py-2 text-white mb-8 transition-colors">
+            <button onclick="ui.closePin()" class="text-xs text-white/40 hover:text-white uppercase tracking-wider">Cancel Operation</button>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION FOR HOSTING ---
+        // IF HOSTING: Paste your Google Gemini API Key below to enable AI for all visitors.
+        // SECURITY WARNING: This key will be visible in the browser source code.
+        // RECOMMENDATION: Restrict this key to your website's domain in Google Cloud Console.
+        const HOST_API_KEY = "AIzaSyDAvmEQWkLPFNbg0mQk-E46TDqwi3eL1-A"; 
+
+        // --- CORE SYSTEM ---
+        const sys = {
+            id: () => Date.now().toString(36) + Math.random().toString(36).substr(2),
+            el: (id) => document.getElementById(id),
+            dateStr: (d) => new Date(d).toISOString().split('T')[0],
+            format: (d) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            timeFormat: (t) => new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+            loader: (msg) => {
+                sys.el('loaderMsg').innerText = msg || 'Processing...';
+                sys.el('globalLoader').classList.remove('hidden');
+            },
+            hideLoader: () => {
+                setTimeout(() => sys.el('globalLoader').classList.add('hidden'), 300);
+            }
+        };
+
+        const gemini = {
+            // Helper to get key from code OR local storage
+            getKey: () => {
+                // 1. Check if user has manually set a personal key (Overrides host key)
+                const stored = localStorage.getItem('lum_gemini_key');
+                if(stored) return stored;
+                
+                // 2. Check if Host has provided a key
+                if(HOST_API_KEY) return HOST_API_KEY;
+
+                // 3. If neither, prompt the user
+                const input = prompt("Enter Google Gemini API Key (saved locally):\n\n(To host this site for others without asking them, edit the HOST_API_KEY variable in the code).");
+                if(input) {
+                    localStorage.setItem('lum_gemini_key', input);
+                    return input;
+                }
+                return null;
+            },
+            
+            ask: async (prompt, silent = false) => {
+                const key = gemini.getKey();
+                if(!key) { if(!silent) alert("API Key required for AI features."); return null; }
+                
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${key}`;
+                
+                try {
+                    if(!silent) sys.loader("Consulting AI...");
+                    const delays = [1000, 2000, 4000];
+                    let response;
+                    let data;
+                    
+                    for (let i = 0; i < 3; i++) {
+                        try {
+                            response = await fetch(url, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                            });
+                            
+                            if (response.ok) {
+                                data = await response.json();
+                                break; 
+                            } else {
+                                await new Promise(resolve => setTimeout(resolve, delays[i]));
+                            }
+                        } catch (e) {
+                            if (i === 2) throw e; 
+                            await new Promise(resolve => setTimeout(resolve, delays[i]));
+                        }
+                    }
+
+                    if(!data) throw new Error("Failed to get response");
+                    if(!silent) sys.hideLoader();
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text;
+                } catch (e) {
+                    if(!silent) sys.hideLoader();
+                    console.error("AI Error:", e);
+                    if(!silent) alert("AI Error: " + e.message);
+                    return null;
+                }
+            },
+            
+            // Unified helper for commands
+            command: async (userText, isChat = false) => {
+                const today = new Date().toISOString();
+                const systemPrompt = `
+                    You are Lummina, an intelligent Life OS assistant. 
+                    Current Date: ${today}.
+                    
+                    User Input: "${userText}"
+                    
+                    If the user wants to ADD/CREATE a task, routine, event, or project, or perform an action, return ONLY a JSON object prefixed with "||JSON||" like this:
+                    ||JSON||{"type": "task", "data": {"title": "...", "date": "YYYY-MM-DD", "time": "HH:MM", "priority": "medium"}}
+                    
+                    Types: 'task', 'routine', 'event', 'project'.
+                    Data fields: title (required), date (YYYY-MM-DD), time (HH:MM), priority (low/medium/high), freq (daily/weekly/monthly for routine), location (for event), deadline (for project).
+                    
+                    If the user is just chatting or asking a question, return a helpful, concise plain text response (no JSON).
+                `;
+                return await gemini.ask(systemPrompt, isChat); // Pass silent flag if chat
+            }
+        };
+
+        const state = {
+            profiles: [],
+            current: null,
+            viewDate: new Date(),
+            activeTab: 'dashboard',
+            dashFilter: null,
+            journalTab: 'journal',
+            journalSearch: '',
+            focusTimer: null,
+            focusTimeMax: 25 * 60,
+            focusTimeLeft: 25 * 60,
+            isFocusing: false,
+            data: { 
+                tasks: [], routines: [], projects: [], events: [], journal: [], 
+                calendarNotes: [], ignoredLogs: [], notifications: [], settings: {},
+                chatHistory: [] // Added for Assistant
+            },
+            settings: { sound: true, startMon: true, theme: 'dark', showCompleted: true, defaultView: 'dashboard' },
+            tempPinCallback: null
+        };
+
+        // --- STORAGE & ENCRYPTION ---
+        const store = {
+            saveProfiles: () => localStorage.setItem('lum_profiles', JSON.stringify(state.profiles)),
+            getProfiles: () => JSON.parse(localStorage.getItem('lum_profiles') || '[]'),
+            
+            saveVault: (pid, data) => {
+                const payload = btoa(encodeURIComponent(JSON.stringify(data)));
+                localStorage.setItem('lum_vault_' + pid, payload);
+            },
+            
+            loadVault: (pid) => {
+                const raw = localStorage.getItem('lum_vault_' + pid);
+                const defaults = { tasks: [], routines: [], projects: [], events: [], journal: [], calendarNotes: [], ignoredLogs: [], notifications: [], settings: {}, chatHistory: [] };
+                if (!raw) return defaults;
+                try {
+                    const data = JSON.parse(decodeURIComponent(atob(raw)));
+                    return { ...defaults, ...data };
+                } catch(e) { return defaults; }
+            }
+        };
+
+        // --- QUOTES ---
+        const quotes = [
+            "Believe you can and you're halfway there.", "Your time is limited, don't waste it living someone else's life.",
+            "The only way to do great work is to love what you do.", "Don't watch the clock; do what it does. Keep going.",
+            "Success is not final, failure is not fatal.", "Dream big and dare to fail."
+        ];
+
+        // --- AUTHENTICATION ---
+        const auth = {
+            init: () => {
+                sys.el('headerDate').innerText = new Date().toLocaleDateString(undefined, {weekday:'long', month:'long', day:'numeric'});
+                setTimeout(() => {
+                    sys.el('preloader').style.opacity = '0';
+                    setTimeout(() => {
+                        sys.el('preloader').style.display = 'none';
+                        auth.renderList();
+                    }, 600);
+                }, 1000);
+            },
+
+            renderList: () => {
+                state.profiles = store.getProfiles();
+                const list = sys.el('profileList');
+                list.innerHTML = '';
+                
+                if (state.profiles.length === 0) list.innerHTML = `<div class="text-center text-white/30 text-xs py-4">No vaults found.</div>`;
+
+                state.profiles.forEach(p => {
+                    list.innerHTML += `
+                        <div class="glass-panel p-3 rounded-lg flex justify-between items-center group hover:bg-white/5 transition-all">
+                            <div class="flex items-center gap-3 cursor-pointer flex-1" onclick="auth.verify('${p.id}', false)">
+                                <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs">
+                                    ${p.pin ? '<i data-lucide="lock" class="w-3 h-3"></i>' : '<i data-lucide="user" class="w-3 h-3"></i>'}
+                                </div>
+                                <span class="font-medium text-sm">${p.name}</span>
+                            </div>
+                            <button onclick="auth.verify('${p.id}', true)" class="text-white/20 hover:text-red-400 p-2"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>
+                    `;
+                });
+                sys.el('authScreen').classList.remove('hidden');
+                sys.el('authScreen').classList.add('flex');
+                lucide.createIcons();
+            },
+
+            verify: (pid, isDelete) => {
+                const profile = state.profiles.find(p => p.id === pid);
+                if (profile.pin) {
+                    const modal = sys.el('pinModal');
+                    sys.el('pinProfileName').innerText = profile.name;
+                    sys.el('pinActionType').innerText = isDelete ? "CONFIRM DELETION" : "UNLOCK VAULT";
+                    sys.el('pinActionType').className = isDelete ? "text-xs text-red-400 mb-6 font-bold" : "text-xs text-white/40 mb-6 uppercase tracking-wider";
+                    sys.el('pinInput').value = '';
+                    modal.classList.remove('hidden');
+                    state.tempPinCallback = () => {
+                        if (sys.el('pinInput').value === profile.pin) {
+                            modal.classList.add('hidden');
+                            isDelete ? auth.deleteProfile(pid) : auth.login(pid);
+                        }
+                    };
+                } else {
+                    isDelete ? auth.deleteProfile(pid) : auth.login(pid);
+                }
+            },
+
+            deleteProfile: (pid) => {
+                if(!confirm("Destroy this vault permanently?")) return;
+                sys.loader("Destroying Vault...");
+                setTimeout(() => {
+                    state.profiles = state.profiles.filter(p => p.id !== pid);
+                    store.saveProfiles();
+                    localStorage.removeItem('lum_vault_' + pid);
+                    sys.hideLoader();
+                    auth.renderList();
+                }, 800);
+            },
+
+            login: (pid) => {
+                sys.loader("Decrypting...");
+                setTimeout(() => {
+                    state.current = pid;
+                    state.data = store.loadVault(pid);
+                    
+                    if(!state.data.journal) state.data.journal = [];
+                    if(!state.data.calendarNotes) state.data.calendarNotes = [];
+                    if(!state.data.ignoredLogs) state.data.ignoredLogs = [];
+                    if(!state.data.events) state.data.events = [];
+                    if(!state.data.notifications) state.data.notifications = [];
+                    if(!state.data.chatHistory) state.data.chatHistory = []; // Initialize chat
+                    
+                    if(state.data.settings && Object.keys(state.data.settings).length > 0) {
+                        state.settings = { ...state.settings, ...state.data.settings };
+                    }
+                    
+                    sys.hideLoader();
+                    sys.el('authScreen').classList.add('hidden');
+                    sys.el('appContainer').classList.remove('opacity-0');
+                    logic.refreshStats();
+                    render.view(state.settings.defaultView || 'dashboard');
+                    logic.startTick();
+                }, 600);
+            },
+
+            createProfile: (e) => {
+                e.preventDefault();
+                const name = sys.el('newProfileName').value;
+                const pin = sys.el('newProfilePin').value;
+                const pid = sys.id();
+                state.profiles.push({ id: pid, name, pin: pin || null });
+                store.saveProfiles();
+                store.saveVault(pid, { tasks: [], routines: [], projects: [], events: [], journal: [], calendarNotes: [], ignoredLogs: [], notifications: [], settings: [], chatHistory: [] });
+                sys.el('profileModal').classList.add('hidden');
+                e.target.reset();
+                auth.renderList();
+            },
+
+            showCreateProfile: () => sys.el('profileModal').classList.remove('hidden'),
+            logout: () => location.reload()
+        };
+
+        // --- LOGIC ---
+        const logic = {
+            persist: () => {
+                state.data.settings = state.settings;
+                store.saveVault(state.current, state.data);
+                // Only re-render if not in settings or focusing or assistant
+                if (state.activeTab !== 'settings' && state.activeTab !== 'assistant' && !state.isFocusing) render.view(state.activeTab);
+            },
+
+            notify: (title, body, type='info') => {
+                state.data.notifications.unshift({ id: sys.id(), title, body, type, ts: Date.now(), read: false });
+                logic.persist();
+                
+                const toast = sys.el('notifToast');
+                sys.el('notifTitle').innerText = title;
+                sys.el('notifBody').innerText = body;
+                toast.classList.remove('hidden');
+                sys.el('notifDot').classList.remove('hidden');
+                setTimeout(() => toast.classList.add('hidden'), 5000);
+            },
+            
+            triggerQuote: () => {
+                const q = quotes[Math.floor(Math.random() * quotes.length)];
+                logic.notify("Daily Inspiration", q, "quote");
+            },
+
+            clearNotifs: () => {
+                state.data.notifications = [];
+                logic.persist();
+                ui.renderNotifs();
+            },
+
+            getGreeting: () => {
+                const hour = new Date().getHours();
+                const profile = state.profiles.find(p => p.id === state.current);
+                const name = profile ? profile.name : 'User';
+                
+                let greeting = "Good Morning";
+                if (hour >= 12) greeting = "Good Afternoon";
+                if (hour >= 18) greeting = "Good Evening";
+                
+                return `${greeting}, ${name}`;
+            },
+
+            refreshStats: () => {
+                const today = new Date().setHours(0,0,0,0);
+                state.data.routines.forEach(r => {
+                    const last = r.lastCompleted ? new Date(r.lastCompleted).setHours(0,0,0,0) : 0;
+                    if (r.freq === 'daily' && last < today) r.completed = false;
+                    if (r.freq === 'weekly' && (Date.now() - r.lastCompleted > 604800000)) r.completed = false;
+                });
+            },
+
+            calcStreak: (history) => {
+                if(!history || !history.length) return 0;
+                const dates = [...new Set(history)].sort().reverse();
+                const today = sys.dateStr(new Date());
+                const yesterday = sys.dateStr(new Date(Date.now() - 86400000));
+                
+                if(dates[0] !== today && dates[0] !== yesterday) return 0;
+
+                let streak = 0;
+                let check = new Date();
+                if(dates[0] !== today) check.setDate(check.getDate() - 1);
+
+                for (let i = 0; i < dates.length; i++) {
+                    const target = sys.dateStr(check);
+                    if(dates.includes(target)) {
+                        streak++;
+                        check.setDate(check.getDate() - 1);
+                    } else {
+                        break;
+                    }
+                }
+                return streak;
+            },
+
+            getTopProjects: () => {
+                return state.data.projects
+                    .map(p => {
+                        const tasks = state.data.tasks.filter(t => t.projectId === p.id);
+                        const done = tasks.filter(t => t.completed).length;
+                        return { ...p, pct: tasks.length ? Math.round((done/tasks.length)*100) : 0 };
+                    })
+                    .sort((a,b) => (a.deadline||9e14) - (b.deadline||9e14))
+                    .slice(0, 5);
+            },
+
+            deleteItem: (type, id) => {
+                if(!confirm("Remove this item permanently?")) return;
+                sys.loader("Deleting...");
+                setTimeout(() => {
+                    if (type === 'calendarNote') {
+                        state.data.calendarNotes = state.data.calendarNotes.filter(n => n.id !== id);
+                    } else if (type === 'event') {
+                        state.data.events = state.data.events.filter(e => e.id !== id);
+                    } else {
+                        state.data[type + 's'] = state.data[type + 's'].filter(i => i.id !== id);
+                        if(type==='project') state.data.tasks = state.data.tasks.filter(t => t.projectId !== id);
+                    }
+                    sys.hideLoader();
+                    logic.persist();
+                    if(sys.el('projectDetailModal').style.display !== 'none') ui.closeProjectDetail();
+                }, 400);
+            },
+
+            toggleTask: (id) => {
+                const t = state.data.tasks.find(x => x.id === id);
+                if(t) {
+                    t.completed = !t.completed;
+                    t.completedAt = t.completed ? Date.now() : null;
+                    if(t.completed) logic.triggerQuote();
+                    logic.persist();
+                    if(sys.el('projectDetailModal').classList.contains('flex')) {
+                        const pid = sys.el('editProjId').value;
+                        if(pid) logic.openProject(pid);
+                    }
+                }
+            },
+
+            toggleRoutine: (id) => {
+                const r = state.data.routines.find(x => x.id === id);
+                if(r) {
+                    const today = sys.dateStr(new Date());
+                    r.completed = !r.completed;
+                    r.lastCompleted = r.completed ? Date.now() : 0;
+                    
+                    if(!r.history) r.history = [];
+                    if(r.completed) {
+                        if(!r.history.includes(today)) {
+                            r.history.push(today);
+                            logic.triggerQuote();
+                        }
+                    } else {
+                         r.history = r.history.filter(h => h !== today);
+                    }
+                    logic.persist();
+                }
+            },
+            
+            saveRoutineMemo: (id, text) => {
+                if(!text.trim()) return;
+                const r = state.data.routines.find(x => x.id === id);
+                const today = sys.dateStr(new Date());
+                if(r) {
+                    if(!r.memos) r.memos = {};
+                    if(r.memos[today]) r.memos[today] += `\n${text}`; 
+                    else r.memos[today] = text;
+                    logic.persist();
+                }
+            },
+
+            updateProject: (pid, updates) => {
+                const p = state.data.projects.find(x => x.id === pid);
+                if(p) Object.assign(p, updates);
+                if(updates.status === 'completed') logic.triggerQuote();
+                logic.persist();
+                if(sys.el('projectDetailModal').classList.contains('flex')) logic.openProject(pid);
+                else render.view(state.activeTab);
+            },
+
+            addProjectTask: (pid, taskData) => {
+                state.data.tasks.push({
+                    id: sys.id(),
+                    projectId: pid,
+                    createdAt: Date.now(),
+                    completed: false,
+                    ...taskData
+                });
+                logic.persist();
+                logic.openProject(pid);
+            },
+            
+            addCalendarNote: (date, text) => {
+                state.data.calendarNotes.push({ id: sys.id(), date, text });
+                logic.persist();
+            },
+
+            openProject: (id) => {
+                const p = state.data.projects.find(x => x.id === id);
+                if(!p) return;
+                
+                const tasks = state.data.tasks.filter(t => t.projectId === id);
+                const done = tasks.filter(t => t.completed).length;
+                const pct = tasks.length ? Math.round((done/tasks.length)*100) : 0;
+
+                const modal = sys.el('projectDetailModal');
+                const content = sys.el('projectDetailContent');
+                
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+
+                content.innerHTML = `
+                    <div class="h-full flex flex-col bg-[#0f172a] relative">
+                         <div class="p-4 lg:p-6 border-b border-white/5 flex flex-col lg:flex-row justify-between items-start bg-white/5 gap-4">
+                             <div class="flex-1 w-full">
+                                <input id="editProjTitle" onchange="app.saveProjectEdit('${p.id}')" value="${p.title}" class="bg-transparent text-xl lg:text-3xl font-bold w-full focus:outline-none border-b border-transparent focus:border-lummina-primary mb-2 text-white">
+                                <div class="flex flex-wrap gap-4 text-xs text-lummina-muted items-center">
+                                    <span class="flex items-center gap-2">Deadline: <input type="date" id="editProjDeadline" onchange="app.saveProjectEdit('${p.id}')" value="${p.deadline ? sys.dateStr(p.deadline) : ''}" class="bg-transparent text-white focus:outline-none p-1 border border-white/10 rounded"></span>
+                                    <span>${done}/${tasks.length} Tasks</span>
+                                    <select onchange="app.saveProjectEdit('${p.id}')" id="editProjStatus" class="bg-black/30 text-white p-1 rounded border border-white/10">
+                                        <option value="planned" ${p.status==='planned'?'selected':''}>Planned</option>
+                                        <option value="active" ${p.status==='active'||!p.status?'selected':''}>In Progress</option>
+                                        <option value="completed" ${p.status==='completed'?'selected':''}>Completed</option>
+                                    </select>
+                                </div>
+                             </div>
+                             <button onclick="ui.closeProjectDetail()" class="p-2 hover:bg-white/10 rounded-full absolute top-2 right-2 lg:static"><i data-lucide="x"></i></button>
+                         </div>
+                         
+                         <div class="p-4 lg:p-6 grid lg:grid-cols-3 gap-6 border-b border-white/5">
+                             <div class="lg:col-span-2">
+                                <label class="text-xs font-bold text-lummina-primary uppercase">Project Goal (WBS)</label>
+                                <textarea id="editProjGoal" onchange="app.saveProjectEdit('${p.id}')" class="w-full bg-black/20 rounded-lg p-3 text-sm mt-2 focus:outline-none resize-none h-24 text-white">${p.goal || ''}</textarea>
+                                <input type="hidden" id="editProjId" value="${p.id}">
+                             </div>
+                             <div class="bg-white/5 rounded-xl p-4 flex flex-col justify-center items-center">
+                                <div class="text-4xl font-mono font-bold text-white mb-2">${pct}%</div>
+                                <div class="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                                    <div class="h-full bg-lummina-primary transition-all duration-700" style="width: ${pct}%"></div>
+                                </div>
+                             </div>
+                         </div>
+
+                         <div class="p-4 bg-lummina-primary/5 border-b border-white/5">
+                             <div class="flex justify-between items-center mb-2">
+                                <h4 class="text-xs font-bold text-lummina-muted uppercase">Task List</h4>
+                                <button onclick="app.aiBreakdownProject('${p.id}')" class="text-xs bg-lummina-primary/20 text-lummina-primary px-2 py-1 rounded hover:bg-lummina-primary/30 flex items-center gap-1 transition-all">
+                                    ✨ AI Breakdown
+                                </button>
+                             </div>
+                             <form onsubmit="app.projectQuickAdd(event, '${p.id}')" class="flex flex-wrap gap-2 items-center">
+                                <input name="title" required placeholder="New Sub-task..." class="glass-input rounded-lg p-2 text-sm flex-1 min-w-[200px]">
+                                <input name="date" type="date" class="glass-input rounded-lg p-2 text-sm w-32">
+                                <select name="priority" class="glass-input rounded-lg p-2 text-sm w-28">
+                                    <option value="high">High</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="low">Low</option>
+                                </select>
+                                <button type="submit" class="bg-lummina-primary p-2 rounded-lg text-white hover:bg-violet-600"><i data-lucide="plus" class="w-4 h-4"></i></button>
+                             </form>
+                         </div>
+
+                         <div class="flex-1 overflow-y-auto p-4 lg:p-6 space-y-2 bg-black/20">
+                             ${tasks.length === 0 ? '<div class="text-center text-white/20 py-10">No tasks defined yet. Break it down!</div>' : ''}
+                             ${tasks.map(t => render.card(t)).join('')}
+                         </div>
+
+                         <div class="p-4 border-t border-white/5 flex justify-end">
+                             <button onclick="logic.deleteItem('project', '${p.id}')" class="text-red-400 text-xs hover:underline">Delete Project</button>
+                         </div>
+                    </div>
+                `;
+                lucide.createIcons();
+            },
+
+            startTick: () => {
+                setInterval(() => {
+                    const now = new Date();
+                    const nowTs = now.getTime();
+                    
+                    sys.el('clockDisplay').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+                    sys.el('headerDate').innerText = now.toLocaleDateString(undefined, {weekday:'long', month:'long', day:'numeric'});
+                    
+                    document.querySelectorAll('.countdown').forEach(el => {
+                        const target = parseInt(el.dataset.target);
+                        if(!target) return;
+                        const diff = target - nowTs;
+                        if (diff <= 0) { el.innerText = "DUE"; el.classList.add('text-red-500'); return; }
+                        
+                        if(diff < 3600000) { 
+                            const m = Math.floor(diff / 60000);
+                            const s = Math.floor((diff % 60000) / 1000);
+                            el.innerText = `${m}m ${s}s`;
+                            el.classList.add('text-lummina-warning');
+                        } else if(diff < 86400000) {
+                            const h = Math.floor(diff / 3600000);
+                            const m = Math.floor((diff % 3600000) / 60000);
+                            el.innerText = `${h}h ${m}m`;
+                        } else {
+                            const d = Math.floor(diff / 86400000);
+                            el.innerText = `${d}d left`;
+                        }
+                    });
+                }, 1000);
+            },
+            
+            updateFocusDuration: (mins) => {
+                if(state.isFocusing) return;
+                state.focusTimeMax = mins * 60;
+                state.focusTimeLeft = state.focusTimeMax;
+                const m = Math.floor(state.focusTimeLeft / 60);
+                const s = state.focusTimeLeft % 60;
+                sys.el('focusDisplay').innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            },
+
+            toggleFocus: () => {
+                if(state.isFocusing) {
+                    clearInterval(state.focusTimer);
+                    state.isFocusing = false;
+                    sys.el('focusBtn').innerHTML = '<i data-lucide="play" class="w-5 h-5"></i> Start';
+                    sys.el('focusBtn').classList.remove('bg-red-500');
+                    sys.el('focusBtn').classList.add('bg-lummina-primary');
+                    sys.el('focusSelect').disabled = false;
+                } else {
+                    state.isFocusing = true;
+                    sys.el('focusSelect').disabled = true;
+                    sys.el('focusBtn').innerHTML = '<i data-lucide="pause" class="w-5 h-5"></i> Stop';
+                    sys.el('focusBtn').classList.remove('bg-lummina-primary');
+                    sys.el('focusBtn').classList.add('bg-red-500');
+                    
+                    state.focusTimer = setInterval(() => {
+                        state.focusTimeLeft--;
+                        const m = Math.floor(state.focusTimeLeft / 60);
+                        const s = state.focusTimeLeft % 60;
+                        sys.el('focusDisplay').innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+                        
+                        if(state.focusTimeLeft <= 0) {
+                            clearInterval(state.focusTimer);
+                            state.isFocusing = false;
+                            state.focusTimeLeft = state.focusTimeMax; 
+                            const maxM = Math.floor(state.focusTimeMax / 60);
+                            sys.el('focusDisplay').innerText = `${String(maxM).padStart(2,'0')}:00`;
+                            sys.el('focusBtn').innerHTML = '<i data-lucide="play" class="w-5 h-5"></i> Start';
+                            sys.el('focusSelect').disabled = false;
+                            
+                            state.data.journal.push({ 
+                                id: sys.id(), 
+                                ts: Date.now(), 
+                                text: `Completed ${maxM}m Focus Session`, 
+                                mood: "happy" 
+                            });
+                            logic.notify("Focus Complete", "Great job! Session finished.", "success");
+                            logic.persist();
+                        }
+                    }, 1000);
+                }
+                lucide.createIcons();
+            }
+        };
+
+        // --- RENDER ENGINE ---
+        const render = {
+            view: (tab) => {
+                const vp = sys.el('viewport');
+                sys.el('pageTitle').innerText = tab === 'dashboard' ? logic.getGreeting() : tab.charAt(0).toUpperCase() + tab.slice(1);
+                state.activeTab = tab;
+                
+                document.querySelectorAll('.nav-btn').forEach(b => {
+                    b.classList.remove('bg-white/10', 'text-white');
+                    b.classList.add('text-lummina-muted');
+                });
+                const activeBtn = document.querySelector(`button[onclick="app.navigate('${tab}')"]`);
+                if(activeBtn) {
+                     activeBtn.classList.add('bg-white/10', 'text-white');
+                     activeBtn.classList.remove('text-lummina-muted');
+                }
+
+                vp.innerHTML = '';
+                vp.classList.remove('animate-slide-up');
+                void vp.offsetWidth;
+                vp.classList.add('animate-slide-up');
+
+                if(render[tab]) render[tab](vp);
+                lucide.createIcons();
+            },
+
+            card: (t) => {
+                let countdownHtml = '';
+                if(!t.completed && t.date && t.time) {
+                    const dueTs = new Date(`${t.date}T${t.time}`).getTime();
+                    countdownHtml = `<span class="text-[10px] font-mono text-lummina-warning ml-2 countdown" data-target="${dueTs}">...</span>`;
+                }
+
+                return `
+                <div class="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/5 hover:border-white/20 transition-all group">
+                    <div onclick="logic.toggleTask('${t.id}')" class="w-5 h-5 rounded border-2 ${t.completed ? 'bg-lummina-success border-lummina-success' : 'border-white/30'} flex items-center justify-center cursor-pointer transition-colors">
+                        <i data-lucide="check" class="w-3 h-3 text-white ${t.completed ? '' : 'hidden'}"></i>
+                    </div>
+                    <div class="flex-1 overflow-hidden">
+                        <div class="flex items-center">
+                            <div class="text-sm font-medium truncate ${t.completed ? 'line-through text-white/30' : 'text-white'}">${t.title}</div>
+                            ${countdownHtml}
+                        </div>
+                        <div class="flex gap-2 items-center text-[10px] text-white/40">
+                            ${t.date ? `<span><i data-lucide="clock" class="w-3 h-3 inline"></i> ${sys.format(t.date)}</span>` : ''}
+                            ${t.memo ? `<span class="italic truncate max-w-[100px]">"${t.memo}"</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] px-2 py-0.5 rounded uppercase font-bold ${t.priority==='high'?'bg-red-500/20 text-red-400':(t.priority==='medium'?'bg-yellow-500/20 text-yellow-400':'bg-blue-500/20 text-blue-400')}">${t.priority.charAt(0)}</span>
+                        <button onclick="logic.deleteItem('task', '${t.id}')" class="opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-opacity"><i data-lucide="x" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
+            `},
+
+            dashboard: (vp) => {
+                const topProjs = logic.getTopProjects();
+                const activeTasks = state.data.tasks.filter(t => !t.completed);
+                const activeRoutines = state.data.routines.filter(r => !r.completed);
+                const criticalTasks = activeTasks.filter(t => t.priority === 'high').slice(0, 3);
+                
+                const now = Date.now();
+                const upcomingEvents = state.data.events
+                    .filter(e => new Date(e.date + 'T' + e.time).getTime() > now)
+                    .sort((a,b) => new Date(a.date+'T'+a.time) - new Date(b.date+'T'+b.time))
+                    .slice(0, 2);
+
+                const statsHtml = `
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div onclick="app.filterDash('tasks')" class="glass-panel p-4 rounded-xl cursor-pointer hover:bg-white/5 transition-all ${state.dashFilter === 'tasks' ? 'border-lummina-primary' : ''}">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="p-2 bg-blue-500/20 rounded-lg text-blue-400"><i data-lucide="check-square" class="w-5 h-5"></i></div>
+                                <span class="text-2xl font-bold">${activeTasks.length}</span>
+                            </div>
+                            <div class="text-xs text-lummina-muted">Active Tasks</div>
+                        </div>
+                        <div onclick="app.filterDash('daily')" class="glass-panel p-4 rounded-xl cursor-pointer hover:bg-white/5 transition-all ${state.dashFilter === 'daily' ? 'border-lummina-primary' : ''}">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="p-2 bg-yellow-500/20 rounded-lg text-yellow-400"><i data-lucide="sun" class="w-5 h-5"></i></div>
+                                <span class="text-2xl font-bold">${activeRoutines.filter(r=>r.freq==='daily').length}</span>
+                            </div>
+                            <div class="text-xs text-lummina-muted">Daily Loops</div>
+                        </div>
+                        <div onclick="app.navigate('events')" class="glass-panel p-4 rounded-xl cursor-pointer hover:bg-white/5 transition-all">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="p-2 bg-pink-500/20 rounded-lg text-pink-400"><i data-lucide="ticket" class="w-5 h-5"></i></div>
+                                <span class="text-2xl font-bold">${upcomingEvents.length}</span>
+                            </div>
+                            <div class="text-xs text-lummina-muted">Upcoming Events</div>
+                        </div>
+                        <div onclick="app.navigate('projects')" class="glass-panel p-4 rounded-xl cursor-pointer hover:bg-white/5 transition-all">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="p-2 bg-green-500/20 rounded-lg text-green-400"><i data-lucide="briefcase" class="w-5 h-5"></i></div>
+                                <span class="text-2xl font-bold">${state.data.projects.filter(p=>p.status!=='completed').length}</span>
+                            </div>
+                            <div class="text-xs text-lummina-muted">Active Projects</div>
+                        </div>
+                    </div>
+                `;
+
+                let centerArea = '';
+                if(upcomingEvents.length > 0) {
+                    centerArea += `
+                        <div class="glass-panel rounded-xl p-5 mb-6">
+                            <h3 class="font-bold text-sm uppercase text-lummina-muted mb-3 flex items-center gap-2"><i data-lucide="calendar-clock" class="w-4 h-4"></i> Up Next</h3>
+                            <div class="grid md:grid-cols-2 gap-3">
+                                ${upcomingEvents.map(e => `
+                                    <div class="bg-white/5 p-3 rounded-lg border-l-4 border-pink-500">
+                                        <div class="font-bold text-sm">${e.title}</div>
+                                        <div class="text-xs text-white/50 flex gap-2 mt-1">
+                                            <span><i data-lucide="clock" class="w-3 h-3 inline"></i> ${sys.timeFormat(new Date().setHours(...e.time.split(':')))}</span>
+                                            <span><i data-lucide="map-pin" class="w-3 h-3 inline"></i> ${e.location || 'N/A'}</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (!state.dashFilter && criticalTasks.length > 0) {
+                     centerArea += `
+                        <div class="glass-panel rounded-xl p-5 mb-6 border-l-4 border-l-red-500">
+                            <h3 class="font-bold text-sm uppercase text-red-400 mb-3 flex items-center gap-2"><i data-lucide="alert-circle" class="w-4 h-4"></i> Critical Focus</h3>
+                            <div class="space-y-2">
+                                ${criticalTasks.map(t => render.card(t)).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (state.dashFilter === 'tasks') {
+                    centerArea += `
+                        <div class="glass-panel rounded-xl p-5 mb-6 animate-slide-up">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-sm uppercase text-lummina-muted">Task Management</h3>
+                                <button onclick="app.clearDashFilter()" class="text-xs text-white/50 hover:text-white">Close</button>
+                            </div>
+                            <div class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+                                ${activeTasks.length ? activeTasks.map(t => render.card(t)).join('') : '<div class="text-center text-sm text-white/30 py-4">All caught up!</div>'}
+                            </div>
+                        </div>
+                    `;
+                } else if (state.dashFilter === 'daily') {
+                     centerArea += `
+                        <div class="glass-panel rounded-xl p-5 mb-6 animate-slide-up">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-sm uppercase text-lummina-muted">Daily Routine Check</h3>
+                                <button onclick="app.clearDashFilter()" class="text-xs text-white/50 hover:text-white">Close</button>
+                            </div>
+                            <div class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+                                ${state.data.routines.filter(r=>r.freq==='daily' && !r.completed).map(r => `
+                                    <div class="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/5">
+                                        <div onclick="logic.toggleRoutine('${r.id}')" class="w-5 h-5 rounded-full border border-white/30 cursor-pointer hover:bg-lummina-success hover:border-transparent"></div>
+                                        <div class="font-medium flex-1">${r.title}</div>
+                                    </div>
+                                `).join('')}
+                                ${state.data.routines.filter(r=>r.freq==='daily' && !r.completed).length === 0 ? '<div class="text-center text-sm text-white/30 py-4">All routines done!</div>' : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                const projectsHtml = topProjs.length ? `
+                    <div class="glass-panel rounded-xl p-5 mb-6">
+                        <h3 class="font-bold text-sm mb-4 uppercase tracking-wider text-lummina-muted">Active Projects</h3>
+                        <div class="space-y-3">
+                            ${topProjs.map(p => `
+                                <div onclick="logic.openProject('${p.id}')" class="flex items-center gap-4 p-3 rounded-lg bg-white/5 hover:bg-white/10 cursor-pointer transition-all border border-transparent hover:border-lummina-primary/30">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-lummina-primary to-blue-600 flex items-center justify-center text-xs font-bold text-white shadow-lg shrink-0">${p.pct}%</div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="font-bold truncate">${p.title}</div>
+                                        <div class="flex gap-2">
+                                            <span class="text-[10px] px-1.5 py-0.5 rounded ${p.status==='planned'?'bg-blue-500/20 text-blue-400':(p.status==='completed'?'bg-green-500/20 text-green-400':'bg-yellow-500/20 text-yellow-400')} uppercase">${p.status||'Active'}</span>
+                                            <span class="text-[10px] text-lummina-muted font-mono countdown" data-target="${p.deadline}"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : `<div class="p-6 text-center border border-dashed border-white/10 rounded-xl mb-6 text-white/30 text-sm">No active projects. Start one!</div>`;
+
+                const m = Math.floor(state.focusTimeLeft / 60);
+                const s = state.focusTimeLeft % 60;
+                const timeDisplay = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+                
+                const focusHtml = `
+                    <div class="glass-panel rounded-xl p-6 flex flex-col items-center justify-center text-center relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-gradient-to-tr from-lummina-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <h3 class="font-bold text-sm mb-2 uppercase tracking-wider text-lummina-muted relative z-10">Focus Zone</h3>
+                        <div id="focusDisplay" class="text-6xl font-mono font-bold text-white my-2 relative z-10">${timeDisplay}</div>
+                        <div class="flex flex-col gap-3 relative z-10 w-full max-w-[200px]">
+                            <select id="focusSelect" onchange="logic.updateFocusDuration(this.value)" class="glass-input rounded-lg p-2 text-xs text-center w-full mb-2">
+                                <option value="15">15 Minutes</option>
+                                <option value="25" selected>25 Minutes</option>
+                                <option value="45">45 Minutes</option>
+                                <option value="60">60 Minutes</option>
+                            </select>
+                            <button id="focusBtn" onclick="logic.toggleFocus()" class="bg-lummina-primary hover:bg-violet-600 text-white px-6 py-2 rounded-full font-bold flex items-center justify-center gap-2 transition-colors w-full">
+                                <i data-lucide="play" class="w-5 h-5"></i> Start
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                vp.innerHTML = statsHtml + centerArea + '<div class="grid lg:grid-cols-2 gap-6">' + projectsHtml + focusHtml + '</div>';
+            },
+
+            // --- NEW ASSISTANT VIEW ---
+            assistant: (vp) => {
+                const history = state.data.chatHistory || [];
+                
+                vp.innerHTML = `
+                    <div class="max-w-3xl mx-auto h-full flex flex-col">
+                        <div class="glass-panel rounded-xl p-4 mb-4 flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
+                                    <i data-lucide="bot" class="text-white w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold">Lummina AI Assistant</h3>
+                                    <p class="text-xs text-lummina-muted">Chat with Gemini about your schedule, ideas, or anything.</p>
+                                </div>
+                            </div>
+                            <button onclick="app.clearChat()" class="text-xs text-white/30 hover:text-white" title="Clear History">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+
+                        <div id="chatContainer" class="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-4 mb-4">
+                            ${history.length === 0 ? `
+                                <div class="text-center text-white/20 mt-20">
+                                    <i data-lucide="message-square-dashed" class="w-12 h-12 mx-auto mb-2"></i>
+                                    <p class="text-sm">No messages yet. Say hello!</p>
+                                </div>
+                            ` : history.map(msg => `
+                                <div class="flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}">
+                                    <div class="chat-msg ${msg.role === 'user' ? 'chat-user' : 'chat-ai'}">
+                                        ${msg.text}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <div class="glass-panel p-2 rounded-xl flex items-center gap-2 relative">
+                            <input id="chatInput" type="text" placeholder="Ask Gemini, or say 'Add task to buy milk'..." class="flex-1 bg-transparent text-white p-3 text-sm focus:outline-none" onkeypress="if(event.key === 'Enter') app.handleChat()">
+                            <button onclick="app.handleChat()" class="p-2 bg-white/10 hover:bg-lummina-primary rounded-lg text-white transition-colors">
+                                <i data-lucide="send" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // Scroll to bottom
+                setTimeout(() => {
+                    const c = document.getElementById('chatContainer');
+                    if(c) c.scrollTop = c.scrollHeight;
+                }, 100);
+            },
+
+            events: (vp) => {
+                const events = state.data.events.sort((a,b) => new Date(a.date+'T'+a.time) - new Date(b.date+'T'+b.time));
+                vp.innerHTML = `
+                    <div class="max-w-4xl mx-auto space-y-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-xl font-bold">Events & Agenda</h2>
+                            <button onclick="ui.toggleModal('createModal'); ui.switchFormTab('event')" class="bg-pink-600 hover:bg-pink-500 text-white px-4 py-2 rounded-lg text-sm font-bold flex gap-2">
+                                <i data-lucide="plus"></i> Add Event
+                            </button>
+                        </div>
+                        
+                        ${events.length === 0 ? '<div class="glass-panel p-10 text-center text-white/30">No upcoming events.</div>' : ''}
+                        
+                        <div class="space-y-3">
+                            ${events.map(e => {
+                                const dt = new Date(e.date + 'T' + e.time);
+                                const isPast = dt < new Date();
+                                return `
+                                <div class="glass-panel p-4 rounded-xl flex gap-4 items-center group ${isPast ? 'opacity-50 grayscale' : ''}">
+                                    <div class="w-16 h-16 bg-white/5 rounded-lg flex flex-col items-center justify-center border border-white/10 shrink-0">
+                                        <span class="text-xs text-lummina-muted uppercase">${dt.toLocaleString('default', {month:'short'})}</span>
+                                        <span class="text-xl font-bold">${dt.getDate()}</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex justify-between items-start">
+                                            <h3 class="font-bold text-lg">${e.title}</h3>
+                                            <span class="text-[10px] uppercase px-2 py-0.5 rounded bg-white/10">${e.eventType || 'Event'}</span>
+                                        </div>
+                                        <div class="text-sm text-lummina-muted flex gap-4 mt-1">
+                                            <span><i data-lucide="clock" class="w-3 h-3 inline"></i> ${sys.timeFormat(dt)}</span>
+                                            <span><i data-lucide="map-pin" class="w-3 h-3 inline"></i> ${e.location || 'N/A'}</span>
+                                        </div>
+                                    </div>
+                                    <button onclick="logic.deleteItem('event', '${e.id}')" class="opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-400 p-2"><i data-lucide="trash-2"></i></button>
+                                </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+
+            calendar: (vp) => {
+                const d = state.viewDate;
+                const m = d.getMonth();
+                const y = d.getFullYear();
+                const daysInMonth = new Date(y, m + 1, 0).getDate();
+                const startDay = new Date(y, m, 1).getDay();
+                const offset = state.settings.startMon ? (startDay === 0 ? 6 : startDay - 1) : startDay;
+                const todayStr = sys.dateStr(new Date());
+
+                let grid = '';
+                for(let i=0; i<offset; i++) grid += `<div class="h-24 bg-white/5 opacity-20 rounded-lg hidden lg:block"></div>`;
+                
+                for(let i=1; i<=daysInMonth; i++) {
+                    const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                    const tasks = state.data.tasks.filter(t => t.date === dateStr);
+                    const projs = state.data.projects.filter(p => p.deadline && sys.dateStr(p.deadline) === dateStr);
+                    const notes = state.data.calendarNotes ? state.data.calendarNotes.filter(n => n.date === dateStr) : [];
+                    const evts = state.data.events.filter(e => e.date === dateStr);
+                    const isToday = dateStr === todayStr;
+
+                    grid += `
+                        <div class="h-24 lg:h-32 bg-white/5 border ${isToday ? 'border-lummina-primary today-glow bg-lummina-primary/10' : 'border-white/5'} rounded-lg p-2 relative group hover:border-white/20 transition-all flex flex-col min-w-[100px] lg:min-w-0 snap-center">
+                            <span class="text-xs font-bold ${isToday ? 'text-lummina-primary' : 'text-white/50'}">${i}</span>
+                            <div class="flex-1 overflow-y-auto custom-scrollbar mt-1 space-y-1">
+                                ${evts.map(e => `<div class="text-[9px] bg-pink-500/20 text-pink-300 px-1 rounded truncate" title="${e.title}">★ ${e.title}</div>`).join('')}
+                                ${notes.map(n => `<div onclick="app.viewNote('${n.id}')" class="text-[9px] bg-yellow-500/20 text-yellow-200 px-1 rounded cursor-pointer border-l-2 border-yellow-500 truncate" title="${n.text}">📝 ${n.text}</div>`).join('')}
+                                ${projs.map(p => `<div onclick="logic.openProject('${p.id}')" class="h-1.5 w-full rounded bg-lummina-primary cursor-pointer hover:scale-105" title="Due: ${p.title}"></div>`).join('')}
+                                ${tasks.map(t => `<div class="text-[9px] px-1 rounded truncate ${t.completed ? 'bg-green-500/20 text-green-400 line-through' : 'bg-white/10 text-white'}">${t.title}</div>`).join('')}
+                            </div>
+                            <div class="absolute bottom-1 right-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 flex gap-1">
+                                <button onclick="app.addCalendarNote('${dateStr}')" class="p-1 bg-yellow-600 rounded text-white" title="Add Note"><i data-lucide="sticky-note" class="w-3 h-3"></i></button>
+                                <button onclick="app.quickAddDate('${dateStr}')" class="p-1 bg-lummina-primary rounded text-white" title="Add Task"><i data-lucide="plus" class="w-3 h-3"></i></button>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                const weekDays = state.settings.startMon ? 
+                    ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] : ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+                vp.innerHTML = `
+                    <div class="glass-panel p-4 lg:p-6 rounded-2xl h-full flex flex-col">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold">${d.toLocaleString('default',{month:'long'})} ${y}</h2>
+                            <div class="flex gap-1">
+                                <button onclick="app.modMonth(-1)" class="p-2 hover:bg-white/10 rounded"><i data-lucide="chevron-left"></i></button>
+                                <button onclick="app.modMonth(1)" class="p-2 hover:bg-white/10 rounded"><i data-lucide="chevron-right"></i></button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-7 gap-2 text-center text-[10px] uppercase text-lummina-muted mb-2 min-w-[700px] lg:min-w-0">
+                            ${weekDays.map(d=>`<span>${d}</span>`).join('')}
+                        </div>
+                        <div class="flex-1 mobile-scroll-x snap-x">
+                            <div class="grid grid-cols-7 gap-2 min-w-[700px] lg:min-w-0 h-full">
+                                ${grid}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            routines: (vp) => {
+                 vp.innerHTML = `
+                    <div class="max-w-3xl mx-auto space-y-8">
+                        ${['daily', 'weekly', 'monthly'].map(freq => `
+                            <div>
+                                <h3 class="text-sm font-bold uppercase text-lummina-muted mb-3 flex items-center gap-2">
+                                    <i data-lucide="${freq==='daily'?'sun':(freq==='weekly'?'calendar':'moon')}" class="w-4 h-4"></i> ${freq} Loops
+                                </h3>
+                                <div class="space-y-2">
+                                    ${state.data.routines.filter(r => r.freq === freq).map(r => {
+                                        const streak = logic.calcStreak(r.history);
+                                        const todayMemo = r.memos && r.memos[sys.dateStr(new Date())] ? r.memos[sys.dateStr(new Date())] : '';
+                                        return `
+                                        <div class="glass-panel p-3 rounded-xl flex flex-col gap-2 group">
+                                            <div class="flex items-center gap-4">
+                                                <div onclick="logic.toggleRoutine('${r.id}')" class="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center cursor-pointer hover:scale-110 transition-all ${r.completed ? 'bg-lummina-success border-transparent' : ''}">
+                                                    <i data-lucide="repeat" class="w-4 h-4 text-white"></i>
+                                                </div>
+                                                <div class="flex-1">
+                                                    <div class="flex items-center gap-2">
+                                                        <div class="font-medium ${r.completed ? 'text-lummina-success' : 'text-white'}">${r.title}</div>
+                                                        ${freq === 'daily' && streak > 0 ? `<span class="text-orange-400 text-xs font-bold flex items-center gap-0.5"><i data-lucide="flame" class="w-3 h-3"></i> ${streak}</span>` : ''}
+                                                    </div>
+                                                    ${todayMemo ? `<div class="text-xs text-lummina-muted italic mt-1 whitespace-pre-wrap border-l-2 border-white/10 pl-2">"${todayMemo}"</div>` : ''}
+                                                </div>
+                                                <button onclick="document.getElementById('memo-${r.id}').classList.toggle('hidden')" class="text-white/30 hover:text-white p-2" title="Add Memo"><i data-lucide="message-square-plus" class="w-4 h-4"></i></button>
+                                                <button onclick="logic.deleteItem('routine', '${r.id}')" class="text-white/20 hover:text-red-400 p-2"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                            </div>
+                                            <div id="memo-${r.id}" class="hidden pl-12 pr-4 pb-2">
+                                                <div class="flex gap-2">
+                                                    <input id="inp-memo-${r.id}" type="text" placeholder="Add note for today..." class="w-full glass-input rounded px-2 py-1 text-xs">
+                                                    <button onclick="logic.saveRoutineMemo('${r.id}', document.getElementById('inp-memo-${r.id}').value)" class="bg-lummina-primary text-white px-2 rounded text-xs">Add</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `}).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                 `;
+            },
+            
+            projects: (vp) => {
+                vp.innerHTML = `
+                <div class="grid md:grid-cols-2 gap-4">
+                    ${state.data.projects.map(p => {
+                        const tasks = state.data.tasks.filter(t => t.projectId === p.id);
+                        const done = tasks.filter(t => t.completed).length;
+                        const pct = tasks.length ? Math.round((done/tasks.length)*100) : 0;
+                        const statusColor = p.status === 'completed' ? 'text-green-400' : (p.status === 'planned' ? 'text-blue-400' : 'text-yellow-400');
+                        
+                        return `
+                        <div onclick="logic.openProject('${p.id}')" class="glass-panel p-5 rounded-xl cursor-pointer hover:bg-white/5 hover:border-lummina-primary/40 transition-all group relative overflow-hidden">
+                             ${p.status === 'completed' ? '<div class="absolute top-2 right-2 text-green-500/20"><i data-lucide="medal" class="w-24 h-24"></i></div>' : ''}
+                            <div class="relative z-10">
+                                <div class="flex justify-between items-start mb-4">
+                                    <h3 class="font-bold text-lg ${p.status==='completed'?'line-through opacity-50':''}">${p.title}</h3>
+                                    <span class="text-[10px] uppercase font-bold ${statusColor}">${p.status||'Active'}</span>
+                                </div>
+                                <div class="w-full bg-white/10 rounded-full h-1.5 mb-2 overflow-hidden">
+                                    <div class="bg-gradient-to-r from-lummina-primary to-blue-500 h-full" style="width:${pct}%"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-lummina-muted">
+                                    <span>${done}/${tasks.length} tasks</span>
+                                    <span>${p.deadline ? sys.format(p.deadline) : 'No Deadline'}</span>
+                                </div>
+                            </div>
+                        </div>
+                        `
+                    }).join('')}
+                    <div onclick="ui.toggleModal('createModal'); ui.switchFormTab('project')" class="glass-panel p-5 rounded-xl cursor-pointer hover:bg-white/5 border-dashed border-white/20 flex flex-col items-center justify-center text-lummina-muted hover:text-white transition-all min-h-[150px]">
+                        <i data-lucide="plus-circle" class="w-8 h-8 mb-2"></i>
+                        <span class="text-sm font-bold">Launch Project</span>
+                    </div>
+                </div>`;
+            },
+
+            journal: (vp) => {
+                if(state.journalTab === 'journal') {
+                    const logs = (state.data.journal || []).sort((a,b) => b.ts - a.ts);
+                    vp.innerHTML = `
+                        <div class="max-w-4xl mx-auto h-full flex flex-col">
+                            ${render.journalTabs()}
+                            
+                            <div class="glass-panel p-4 rounded-xl mb-6">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="font-bold">Personal Journal</h3>
+                                    <button onclick="app.aiJournalPrompt()" class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1 rounded-full flex items-center gap-1 transition-all text-pink-300">
+                                        ✨ Inspire Me
+                                    </button>
+                                </div>
+                                <textarea id="journalInput" class="w-full bg-transparent text-white placeholder-white/30 resize-none focus:outline-none mb-3" rows="3" placeholder="Log thoughts, wins, or ideas..."></textarea>
+                                
+                                <div class="flex flex-wrap gap-2 mb-4">
+                                    <button onclick="app.setMood('happy')" id="mood-happy" class="mood-btn opacity-50 hover:opacity-100 transition-all text-2xl" title="Happy">😊</button>
+                                    <button onclick="app.setMood('excited')" id="mood-excited" class="mood-btn opacity-50 hover:opacity-100 transition-all text-2xl" title="Excited">🤩</button>
+                                    <button onclick="app.setMood('neutral')" id="mood-neutral" class="mood-btn opacity-50 hover:opacity-100 transition-all text-2xl" title="Neutral">😐</button>
+                                    <button onclick="app.setMood('tired')" id="mood-tired" class="mood-btn opacity-50 hover:opacity-100 transition-all text-2xl" title="Tired">😴</button>
+                                    <button onclick="app.setMood('sad')" id="mood-sad" class="mood-btn opacity-50 hover:opacity-100 transition-all text-2xl" title="Sad">😔</button>
+                                </div>
+
+                                <div class="flex justify-end">
+                                    <button onclick="app.addJournal()" class="bg-lummina-primary px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-violet-600">Save Entry</button>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                ${logs.map(l => `
+                                    <div class="glass-panel p-4 rounded-xl relative group">
+                                        <div class="flex justify-between text-xs text-lummina-muted mb-2">
+                                            <span>${new Date(l.ts).toLocaleString()}</span>
+                                            <span class="text-lg">${l.moodIcon || '📝'}</span>
+                                        </div>
+                                        <div class="whitespace-pre-wrap">${l.text}</div>
+                                        <button onclick="app.deleteJournal('${l.id}')" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-red-400 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>`;
+                        setTimeout(() => { if(app.currentMood) document.getElementById('mood-'+app.currentMood)?.classList.add('active-mood', 'opacity-100'); }, 50);
+                } else {
+                    let memoHtml = '';
+                    if (state.journalTab === 'routine-memos') {
+                        ['daily', 'weekly', 'monthly'].forEach(freq => {
+                            const routines = state.data.routines.filter(r => r.freq === freq && r.memos);
+                            if(routines.length > 0) {
+                                memoHtml += `<h3 class="font-bold text-lummina-primary uppercase text-xs mb-2 mt-4">${freq} Routine Memos</h3>`;
+                                routines.forEach(r => {
+                                    Object.entries(r.memos).forEach(([date, text]) => {
+                                        memoHtml += `
+                                            <div class="glass-panel p-3 rounded-lg mb-2 text-sm">
+                                                <div class="text-xs text-lummina-muted mb-1 flex justify-between">
+                                                    <span>${r.title}</span> <span>${date}</span>
+                                                </div>
+                                                <div class="pl-2 border-l-2 border-white/10 whitespace-pre-wrap">${text}</div>
+                                            </div>
+                                        `;
+                                    });
+                                });
+                            }
+                        });
+                    } else if (state.journalTab === 'project-memos') {
+                        state.data.tasks.filter(t => t.memo).forEach(t => {
+                             memoHtml += `
+                                <div class="glass-panel p-3 rounded-lg mb-2 text-sm">
+                                    <div class="text-xs text-lummina-muted mb-1">Task Memo: ${t.title}</div>
+                                    <div class="pl-2 border-l-2 border-blue-500/30 whitespace-pre-wrap">${t.memo}</div>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    vp.innerHTML = `
+                        <div class="max-w-4xl mx-auto h-full flex flex-col">
+                            ${render.journalTabs()}
+                            <div class="overflow-y-auto custom-scrollbar">
+                                ${memoHtml || '<div class="text-center text-white/30 py-10">No memos found in this category.</div>'}
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+
+            journalTabs: () => `
+                <div class="flex gap-2 mb-6 border-b border-white/10 pb-4">
+                    <button onclick="app.setJournalTab('journal')" class="px-4 py-2 rounded-lg text-sm font-bold transition-all ${state.journalTab==='journal'?'bg-white text-black':'text-white/50 hover:text-white'}">My Journal</button>
+                    <button onclick="app.setJournalTab('routine-memos')" class="px-4 py-2 rounded-lg text-sm font-bold transition-all ${state.journalTab==='routine-memos'?'bg-white text-black':'text-white/50 hover:text-white'}">Routine Memos</button>
+                    <button onclick="app.setJournalTab('project-memos')" class="px-4 py-2 rounded-lg text-sm font-bold transition-all ${state.journalTab==='project-memos'?'bg-white text-black':'text-white/50 hover:text-white'}">Task Memos</button>
+                </div>
+            `,
+
+            settings: (vp) => {
+                const p = state.profiles.find(x => x.id === state.current);
+                const hasPersonalKey = localStorage.getItem('lum_gemini_key');
+                const usingHostKey = !hasPersonalKey && HOST_API_KEY;
+
+                vp.innerHTML = `
+                    <div class="max-w-xl mx-auto space-y-6 pb-10">
+                        <div class="glass-panel p-6 rounded-xl">
+                            <h3 class="font-bold mb-4 border-b border-white/10 pb-2">Profile & Security</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="text-xs text-lummina-muted uppercase">Display Name</label>
+                                    <div class="flex gap-2 mt-1">
+                                        <input id="setInpName" value="${p.name}" class="glass-input rounded-lg p-2 text-sm flex-1">
+                                        <button onclick="app.updateProfileName()" class="bg-white/10 px-3 rounded-lg text-sm hover:bg-white/20">Save</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-xs text-lummina-muted uppercase">Security PIN</label>
+                                    <div class="flex gap-2 mt-1">
+                                        <input id="setInpPin" type="password" value="${p.pin||''}" placeholder="No PIN set" class="glass-input rounded-lg p-2 text-sm flex-1" maxlength="4">
+                                        <button onclick="app.updateProfilePin()" class="bg-white/10 px-3 rounded-lg text-sm hover:bg-white/20">Update</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- NEW: AI Configuration Section -->
+                        <div class="glass-panel p-6 rounded-xl">
+                            <h3 class="font-bold mb-4 border-b border-white/10 pb-2">AI Configuration</h3>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm">Current Status</span>
+                                <span class="text-xs font-bold px-2 py-1 rounded ${usingHostKey ? 'bg-blue-500/20 text-blue-300' : (hasPersonalKey ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300')}">
+                                    ${usingHostKey ? 'Using Host Key' : (hasPersonalKey ? 'Using Personal Key' : 'Not Configured')}
+                                </span>
+                            </div>
+                            <p class="text-xs text-lummina-muted mb-3">
+                                ${usingHostKey ? 'This site is providing AI features automatically.' : 'You are using your own personal API key.'}
+                            </p>
+                            <div class="flex gap-2">
+                                <button onclick="app.setApiKey()" class="flex-1 bg-white/10 hover:bg-white/20 py-2 rounded-lg text-xs font-bold transition-all">
+                                    ${hasPersonalKey ? 'Change Personal Key' : 'Set Personal Key'}
+                                </button>
+                                ${hasPersonalKey ? `<button onclick="app.clearApiKey()" class="px-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 py-2 rounded-lg text-xs font-bold transition-all">Clear</button>` : ''}
+                            </div>
+                        </div>
+
+                         <div class="glass-panel p-6 rounded-xl">
+                            <h3 class="font-bold mb-4 border-b border-white/10 pb-2">Preferences</h3>
+                            <div class="flex items-center justify-between mb-3">
+                                <span>Start Week on Monday</span>
+                                <button onclick="app.toggleSetting('startMon')" class="w-10 h-5 rounded-full relative transition-colors ${state.settings.startMon ? 'bg-lummina-primary' : 'bg-white/10'}">
+                                    <div class="absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${state.settings.startMon ? 'translate-x-5' : ''}"></div>
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Default View</span>
+                                <select onchange="app.updateDefaultView(this.value)" class="glass-input rounded-lg p-1 text-xs">
+                                    <option value="dashboard" ${state.settings.defaultView==='dashboard'?'selected':''}>Dashboard</option>
+                                    <option value="calendar" ${state.settings.defaultView==='calendar'?'selected':''}>Calendar</option>
+                                    <option value="projects" ${state.settings.defaultView==='projects'?'selected':''}>Projects</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-panel p-6 rounded-xl">
+                            <h3 class="font-bold mb-4 border-b border-white/10 pb-2">Data Management</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <button onclick="app.exportData()" class="p-3 bg-white/5 hover:bg-white/10 rounded-lg text-sm flex items-center justify-center gap-2"><i data-lucide="download" class="w-4 h-4"></i> Export JSON</button>
+                                <label class="p-3 bg-white/5 hover:bg-white/10 rounded-lg text-sm flex items-center justify-center gap-2 cursor-pointer">
+                                    <i data-lucide="upload" class="w-4 h-4"></i> Import JSON
+                                    <input type="file" class="hidden" onchange="app.importData(this)">
+                                </label>
+                            </div>
+                            <button onclick="app.clearAllData()" class="w-full mt-4 p-3 border border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-lg text-sm font-bold transition-all">Clear All Data (Reset)</button>
+                            <button onclick="auth.deleteProfile('${p.id}')" class="w-full mt-2 text-xs text-red-500/50 hover:text-red-500 hover:underline">Delete Profile Permanently</button>
+                        </div>
+                    </div>
+                `;
+            }
+        };
+
+        // --- APP CONTROLLER ---
+        const app = {
+            navigate: (t) => { state.dashFilter=null; render.view(t); },
+            modMonth: (o) => { state.viewDate.setMonth(state.viewDate.getMonth() + o); render.view('calendar'); },
+            filterDash: (f) => { state.dashFilter = f; render.view('dashboard'); },
+            clearDashFilter: () => { state.dashFilter = null; render.view('dashboard'); },
+            
+            toggleSetting: (k) => {
+                state.settings[k] = !state.settings[k];
+                logic.persist();
+                render.view('settings');
+            },
+            updateDefaultView: (v) => {
+                state.settings.defaultView = v;
+                logic.persist();
+            },
+
+            handleCreate: (e) => {
+                e.preventDefault();
+                const type = sys.el('createType').value;
+                const title = sys.el('inpTitle').value;
+                const d = sys.el('inpDate').value;
+                const t = sys.el('inpTime').value;
+                const item = { id: sys.id(), title, createdAt: Date.now(), completed: false };
+
+                if(type === 'task') {
+                    item.priority = sys.el('inpPriority').value;
+                    item.date = d ? d : null;
+                    item.time = t ? t : null;
+                    item.memo = sys.el('inpMemo').value || "";
+                    item.projectId = sys.el('inpProjectLink').value;
+                    state.data.tasks.push(item);
+                } else if(type === 'routine') {
+                    item.freq = sys.el('inpFreq').value;
+                    item.history = [];
+                    state.data.routines.push(item);
+                } else if(type === 'project') {
+                    item.goal = sys.el('inpGoal').value;
+                    item.deadline = d ? new Date(d).getTime() : null;
+                    item.status = sys.el('inpProjStatus').value;
+                    state.data.projects.push(item);
+                } else if(type === 'event') {
+                    item.date = d;
+                    item.time = t;
+                    item.location = sys.el('inpLocation').value;
+                    item.eventType = sys.el('inpEventType').value;
+                    state.data.events.push(item);
+                }
+
+                logic.persist();
+                ui.toggleModal('createModal');
+                e.target.reset();
+            },
+
+            // --- NEW MAGIC ADD HANDLER ---
+            handleMagicAdd: async (e) => {
+                if(e && e.preventDefault) e.preventDefault();
+                const input = sys.el('magicInput');
+                const text = input.value.trim();
+                if(!text) return;
+
+                try {
+                    input.disabled = true;
+                    // Use new gemini command helper
+                    const rawJson = await gemini.command(text);
+                    if (!rawJson) throw new Error("No response");
+
+                    // Check if JSON returned
+                    const jsonMatch = rawJson.match(/\|\|JSON\|\|(.*)/s);
+                    if (jsonMatch && jsonMatch[1]) {
+                         app.processCommand(jsonMatch[1]);
+                         logic.notify("Magic Add", "Item created successfully!", "success");
+                         ui.toggleModal('magicModal');
+                         input.value = '';
+                    } else {
+                         // Fallback if AI didn't return JSON (unlikely with this prompt)
+                         alert("AI didn't understand the command format. Try again.");
+                    }
+                } catch(err) {
+                    alert("Sorry, I couldn't understand that. Please try again.");
+                    console.error(err);
+                } finally {
+                    input.disabled = false;
+                }
+            },
+            
+            // Shared Logic to process the JSON command
+            processCommand: (jsonString) => {
+                 try {
+                    const result = JSON.parse(jsonString);
+                    const d = result.data;
+                    const item = { id: sys.id(), title: d.title, createdAt: Date.now(), completed: false };
+
+                    if(result.type === 'task') {
+                        item.date = d.date || null;
+                        item.time = d.time || null;
+                        item.priority = d.priority || 'medium';
+                        state.data.tasks.push(item);
+                    } else if(result.type === 'routine') {
+                        item.freq = d.freq || 'daily';
+                        item.history = [];
+                        state.data.routines.push(item);
+                    } else if(result.type === 'event') {
+                        item.date = d.date;
+                        item.time = d.time || '12:00';
+                        item.location = d.location || 'N/A';
+                        item.eventType = 'personal';
+                        state.data.events.push(item);
+                    } else if(result.type === 'project') {
+                        item.goal = 'AI Generated Project';
+                        item.deadline = d.deadline ? new Date(d.deadline).getTime() : null;
+                        item.status = 'active';
+                        state.data.projects.push(item);
+                    }
+                    logic.persist();
+                 } catch(e) {
+                     console.error("Failed to parse command", e);
+                 }
+            },
+            
+            startVoice: () => {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if(!SpeechRecognition) { 
+                    logic.notify("System", "Voice input not supported.", "warning"); 
+                    return; 
+                }
+                
+                const btn = document.querySelector('#magicModal button[title="Use Voice"]');
+                const input = sys.el('magicInput');
+                
+                if (btn.classList.contains('bg-red-500')) {
+                    if (app._recognition) app._recognition.stop();
+                    return;
+                }
+                
+                btn.classList.remove('bg-white/10', 'hover:bg-pink-500', 'hover:text-white', 'text-white/70');
+                btn.classList.add('bg-red-500', 'text-white', 'animate-pulse');
+                btn.innerHTML = '<i data-lucide="mic-off" class="w-5 h-5"></i>';
+                lucide.createIcons();
+                
+                const recognition = new SpeechRecognition();
+                app._recognition = recognition;
+
+                recognition.lang = 'en-US';
+                recognition.interimResults = true;
+                recognition.maxAlternatives = 1;
+                
+                recognition.onresult = (e) => {
+                    let finalTranscript = '';
+                    let interimTranscript = '';
+
+                    for (let i = e.resultIndex; i < e.results.length; ++i) {
+                        if (e.results[i].isFinal) {
+                            finalTranscript += e.results[i][0].transcript;
+                        } else {
+                            interimTranscript += e.results[i][0].transcript;
+                        }
+                    }
+                    
+                    const text = finalTranscript || interimTranscript;
+                    if(text) input.value = text;
+
+                    if (finalTranscript) {
+                        setTimeout(() => app.handleMagicAdd({preventDefault:()=>{}}), 1000);
+                    }
+                };
+                
+                recognition.onerror = (e) => {
+                    // Handle specifically the 'network' error which is common in sandboxed iframes
+                    let msg = "Error: " + e.error;
+                    if(e.error === 'network') {
+                        msg = "Voice unavailable. Network blocked or permissions missing.";
+                    } else if(e.error === 'not-allowed') {
+                        msg = "Microphone access denied.";
+                    } else if(e.error === 'no-speech') {
+                        return; // Ignore silence
+                    }
+
+                    logic.notify("Voice Input", msg, "error");
+                    resetBtn();
+                };
+                
+                recognition.onend = () => resetBtn();
+                
+                function resetBtn() {
+                    app._recognition = null;
+                    if(btn) {
+                        btn.classList.remove('bg-red-500', 'text-white', 'animate-pulse');
+                        btn.classList.add('bg-white/10', 'hover:bg-pink-500', 'hover:text-white', 'text-white/70');
+                        btn.innerHTML = '<i data-lucide="mic" class="w-5 h-5"></i>';
+                        lucide.createIcons();
+                    }
+                }
+                
+                try {
+                    recognition.start();
+                } catch(e) {
+                    console.error(e);
+                    logic.notify("System", "Could not start voice API.", "error");
+                    resetBtn();
+                }
+            },
+
+            // --- NEW CHAT HANDLER ---
+            handleChat: async () => {
+                const input = sys.el('chatInput');
+                const text = input.value.trim();
+                if(!text) return;
+
+                // Push User Message
+                state.data.chatHistory.push({ role: 'user', text: text, ts: Date.now() });
+                input.value = '';
+                logic.persist();
+                
+                // Update UI immediately
+                if(state.activeTab === 'assistant') render.view('assistant');
+                
+                // Show typing indicator
+                const chatContainer = sys.el('chatContainer');
+                const typingId = 'typing-' + Date.now();
+                if(chatContainer) {
+                    const typingHtml = `
+                        <div id="${typingId}" class="flex justify-start animate-slide-up">
+                            <div class="chat-msg chat-ai flex items-center h-10">
+                                <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
+                            </div>
+                        </div>`;
+                    chatContainer.insertAdjacentHTML('beforeend', typingHtml);
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }
+
+                // Get AI Response (Silent mode = true)
+                const aiResRaw = await gemini.command(text, true);
+                
+                // Remove typing indicator
+                const typingEl = document.getElementById(typingId);
+                if(typingEl) typingEl.remove();
+                
+                if(aiResRaw) {
+                    let responseText = aiResRaw;
+                    
+                    // Check for Action
+                    const jsonMatch = aiResRaw.match(/\|\|JSON\|\|(.*)/s);
+                    if (jsonMatch && jsonMatch[1]) {
+                        app.processCommand(jsonMatch[1]);
+                        const obj = JSON.parse(jsonMatch[1]);
+                        responseText = `Done! I've added the **${obj.type}** "${obj.data.title}" to your ${obj.type === 'routine' ? 'routines' : 'dashboard'}.`;
+                    }
+                    
+                    state.data.chatHistory.push({ role: 'ai', text: responseText, ts: Date.now() });
+                    logic.persist();
+                    if(state.activeTab === 'assistant') render.view('assistant');
+                }
+            },
+            
+            clearChat: () => {
+                if(confirm("Clear conversation history?")) {
+                    state.data.chatHistory = [];
+                    logic.persist();
+                    render.view('assistant');
+                }
+            },
+
+            projectQuickAdd: (e, pid) => {
+                e.preventDefault();
+                const f = e.target;
+                logic.addProjectTask(pid, {
+                    title: f.title.value,
+                    date: f.date.value || null,
+                    priority: f.priority.value
+                });
+                f.reset();
+            },
+
+            saveProjectEdit: (pid) => {
+                const d = sys.el('editProjDeadline').value;
+                logic.updateProject(pid, {
+                    title: sys.el('editProjTitle').value,
+                    goal: sys.el('editProjGoal').value,
+                    status: sys.el('editProjStatus').value,
+                    deadline: d ? new Date(d).getTime() : null
+                });
+            },
+
+            quickAddDate: (dateStr) => {
+                ui.toggleModal('createModal');
+                sys.el('inpDate').value = dateStr;
+            },
+            
+            addCalendarNote: (dateStr) => {
+                const note = prompt("Enter note for " + dateStr);
+                if(note) logic.addCalendarNote(dateStr, note);
+            },
+            viewNote: (id) => {
+                const note = state.data.calendarNotes.find(n => n.id === id);
+                if(confirm(`Delete note: "${note.text}"?`)) logic.deleteItem('calendarNote', id);
+            },
+            
+            // Journal
+            currentMood: null,
+            setMood: (m) => { 
+                app.currentMood = m; 
+                document.querySelectorAll('.mood-btn').forEach(b => {
+                    b.classList.remove('active-mood', 'opacity-100');
+                    b.classList.add('opacity-50');
+                });
+                const btn = document.getElementById('mood-'+m);
+                if(btn) btn.classList.add('active-mood', 'opacity-100');
+            },
+            setJournalTab: (t) => { state.journalTab = t; render.view('journal'); },
+            addJournal: () => {
+                const txt = sys.el('journalInput').value;
+                if(!txt && !app.currentMood) return;
+                const moodIcons = { happy:'😊', excited:'🤩', neutral:'😐', tired:'😴', sad:'😔' };
+                state.data.journal.push({ 
+                    id: sys.id(), 
+                    ts: Date.now(), 
+                    text: txt, 
+                    mood: app.currentMood,
+                    moodIcon: moodIcons[app.currentMood] 
+                });
+                sys.el('journalInput').value = '';
+                app.currentMood = null;
+                logic.persist();
+                render.view('journal');
+            },
+            deleteJournal: (id) => {
+                if(!confirm('Delete entry?')) return;
+                state.data.journal = state.data.journal.filter(j => j.id !== id);
+                logic.persist();
+                render.view('journal');
+            },
+
+            // Gemini Features
+            aiEnhanceMemo: async () => {
+                const title = sys.el('inpTitle').value;
+                if (!title) { alert("Enter a title first!"); return; }
+                const res = await gemini.ask(`Write a concise, helpful, and slightly motivating memo (max 15 words) for a task titled: "${title}". Be direct.`);
+                if (res) sys.el('inpMemo').value = res.trim();
+            },
+
+            aiJournalPrompt: async () => {
+                const mood = app.currentMood || 'neutral';
+                const res = await gemini.ask(`Give me one specific, deep, and introspection-provoking journaling question for someone feeling "${mood}". Just the question.`);
+                if (res) sys.el('journalInput').value = res.trim();
+            },
+
+            aiBreakdownProject: async (pid) => {
+                const p = state.data.projects.find(x => x.id === pid);
+                if (!p) return;
+                
+                const res = await gemini.ask(`For a project titled "${p.title}" with goal "${p.goal || 'complete it'}", list 3 to 5 concrete, single-step actionable tasks to get started. Format: One task per line. No bullets or numbers. Pure text lines.`);
+                
+                if (res) {
+                    const lines = res.split('\n').filter(l => l.trim().length > 0);
+                    lines.forEach(l => {
+                        logic.addProjectTask(pid, {
+                            title: l.replace(/^[-*•]\s*/, '').trim(), // clean bullet if AI adds it
+                            priority: 'medium',
+                            date: null
+                        });
+                    });
+                    alert(`Added ${lines.length} tasks generated by AI!`);
+                }
+            },
+
+            // Settings & Data
+            updateProfileName: () => {
+                const p = state.profiles.find(x => x.id === state.current);
+                p.name = sys.el('setInpName').value;
+                store.saveProfiles();
+                alert("Name updated");
+                render.view('settings');
+            },
+            updateProfilePin: () => {
+                const p = state.profiles.find(x => x.id === state.current);
+                p.pin = sys.el('setInpPin').value;
+                store.saveProfiles();
+                alert("PIN updated");
+            },
+            clearAllData: () => {
+                if(confirm("Are you sure? This will wipe all tasks, routines, and journal entries for this vault.")) {
+                    state.data = { tasks: [], routines: [], projects: [], events: [], journal: [], calendarNotes: [], ignoredLogs: [], notifications: [], settings: state.settings, chatHistory: [] };
+                    logic.persist();
+                    alert("Vault cleared.");
+                }
+            },
+            // API Key Management
+            setApiKey: () => {
+                const k = prompt("Enter your Gemini API Key:");
+                if(k) {
+                    localStorage.setItem('lum_gemini_key', k);
+                    render.view('settings');
+                }
+            },
+            clearApiKey: () => {
+                if(confirm("Remove your personal API Key?")) {
+                    localStorage.removeItem('lum_gemini_key');
+                    render.view('settings');
+                }
+            },
+            exportData: () => {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.data));
+                const n = document.createElement('a');
+                n.setAttribute("href", dataStr);
+                n.setAttribute("download", "lummina_backup.json");
+                document.body.appendChild(n);
+                n.click();
+                n.remove();
+            },
+            importData: (input) => {
+                const file = input.files[0];
+                if(!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const imported = JSON.parse(e.target.result);
+                        if(imported.tasks && imported.routines) {
+                            state.data = imported;
+                            if(imported.settings) state.settings = imported.settings;
+                            logic.persist();
+                            alert("Import successful. Reloading.");
+                            location.reload();
+                        } else {
+                            throw new Error("Invalid format");
+                        }
+                    } catch(err) { alert("Invalid file format."); }
+                };
+                reader.readAsText(file);
+            }
+        };
+
+        // --- UI UTILS ---
+        const ui = {
+            toggleModal: (id) => {
+                const el = sys.el(id);
+                if(el.classList.contains('hidden')) {
+                    el.classList.remove('hidden');
+                    if(id==='createModal') {
+                        const sel = sys.el('inpProjectLink');
+                        sel.innerHTML = '<option value="">No Project</option>' + state.data.projects.map(p=>`<option value="${p.id}">${p.title}</option>`).join('');
+                        ui.switchFormTab('task');
+                    }
+                    if(id==='magicModal') {
+                        setTimeout(() => sys.el('magicInput').focus(), 100);
+                    }
+                } else {
+                    el.classList.add('hidden');
+                }
+            },
+            toggleNotifCenter: () => {
+                const el = sys.el('notifCenter');
+                if(el.classList.contains('hidden')) {
+                    el.classList.remove('hidden');
+                    ui.renderNotifs();
+                    sys.el('notifDot').classList.add('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            },
+            renderNotifs: () => {
+                const list = sys.el('notifList');
+                if(state.data.notifications.length === 0) {
+                    list.innerHTML = '<div class="text-xs text-center text-white/30 py-4">No notifications</div>';
+                    return;
+                }
+                list.innerHTML = state.data.notifications.map(n => `
+                    <div class="p-2 border-b border-white/5 last:border-0 hover:bg-white/5">
+                        <div class="flex justify-between items-start">
+                            <span class="font-bold text-xs ${n.type==='error'?'text-red-400':(n.type==='success'?'text-green-400':(n.type==='warning'?'text-yellow-400':'text-blue-400'))}">${n.title}</span>
+                            <span class="text-[10px] text-white/30">${sys.timeFormat(new Date(n.ts))}</span>
+                        </div>
+                        <p class="text-xs text-white/70 mt-1">${n.body}</p>
+                    </div>
+                `).join('');
+            },
+            closeProjectDetail: () => {
+                sys.el('projectDetailModal').classList.remove('flex');
+                sys.el('projectDetailModal').classList.add('hidden');
+            },
+            switchFormTab: (type) => {
+                sys.el('createType').value = type;
+                document.querySelectorAll('.form-tab-btn').forEach(b => {
+                    b.classList.remove('bg-white/10', 'text-white');
+                    b.classList.add('text-white/50');
+                });
+                document.querySelector(`button[data-tab="${type}"]`).classList.add('bg-white/10', 'text-white');
+                
+                ['field-routine', 'field-project', 'row-datetime', 'field-parentProject', 'field-memo', 'field-event'].forEach(id => sys.el(id).classList.add('hidden'));
+                
+                sys.el('row-priority').classList.add('hidden');
+
+                if(type === 'task') { 
+                    sys.el('row-datetime').classList.remove('hidden'); 
+                    sys.el('field-parentProject').classList.remove('hidden');
+                    sys.el('field-memo').classList.remove('hidden'); 
+                    sys.el('row-priority').classList.remove('hidden');
+                }
+                if(type === 'routine') sys.el('field-routine').classList.remove('hidden');
+                if(type === 'project') { sys.el('field-project').classList.remove('hidden'); sys.el('row-datetime').classList.remove('hidden'); }
+                if(type === 'event') { sys.el('field-event').classList.remove('hidden'); sys.el('row-datetime').classList.remove('hidden'); }
+            },
+            closePin: () => {
+                sys.el('pinModal').classList.add('hidden');
+                sys.el('pinInput').value = '';
+                state.tempPinCallback = null;
+            }
+        };
+
+        sys.el('pinInput').addEventListener('keyup', () => {
+            if(state.tempPinCallback) state.tempPinCallback();
+        });
+
+        window.onload = auth.init;
+
+    </script>
+</body>
+</html>
